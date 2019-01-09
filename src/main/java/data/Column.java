@@ -29,18 +29,18 @@ import java.util.List;
 
 /**
  * @author flysLi
- * @ClassName Field
+ * @ClassName Column
  * @Decription TODO
  * @Date 2019/1/7 15:55
  * @Version 1.0
  */
-public class Field<T> {
+public class Column<T> {
     private String name;
     private String type;
     private int maxLength;
     private List<T> value;
 
-    public Field() {
+    public Column() {
         this.value = new ArrayList<T>();
     }
 
@@ -78,7 +78,7 @@ public class Field<T> {
 
     @Override
     public String toString() {
-        return "Field{" +
+        return "Column{" +
                 "name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", maxLength=" + maxLength +

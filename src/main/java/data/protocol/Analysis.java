@@ -24,6 +24,12 @@
  */
 package data.protocol;
 
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
+import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
+import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
+import com.alibaba.druid.sql.parser.SQLStatementParser;
+
 /**
  * @author flysLi
  * @ClassName Analysis
@@ -34,20 +40,56 @@ package data.protocol;
 public class Analysis {
     private String sql;
     private String doType;
+    private SQLStatement sqlStatement;
 
     public Analysis(String sql) {
         this.sql = sql;
+        SQLStatementParser parser = new MySqlStatementParser(sql);
+        sqlStatement = parser.parseStatement();
+
+    }
+
+    public static void main(String[] args) {
+        new Analysis("insert into user(id,name,age,sex)values(1,'feifei',26,'男')").doer();
     }
 
     public Object doer() {
-        if (sql.indexOf("SELECT ") > -1) {
+        if (sql.toUpperCase().indexOf("SELECT ") > -1) {
             this.doType = "SELECT";
-            return new Select(sql);
-        } else if (sql.indexOf("INSERT ") > -1) {
+            SQLStatementParser parser = new MySqlStatementParser(sql);
+            SQLStatement statement = parser.parseStatement();
+            MySqlSchemaStatVisitor visitor = new MySqlSchemaStatVisitor();
+            statement.accept(visitor);
+            return new Select(visitor);
+        } else if (sql.toUpperCase().indexOf("INSERT ") > -1) {
             this.doType = "INSERT";
-            return new Insert(sql);
+            MySqlInsertStatement mySqlInsertStatement = (MySqlInsertStatement) sqlStatement;
+            return new Insert(mySqlInsertStatement);
         }
         return null;
     }
 
+    public String getSql() {
+        return sql;
+    }
+
+    public void setSql(String sql) {
+        this.sql = sql;
+    }
+
+    public String getDoType() {
+        return doType;
+    }
+
+    public void setDoType(String doType) {
+        this.doType = doType;
+    }
+
+    public SQLStatement getSqlStatement() {
+        return sqlStatement;
+    }
+
+    public void setSqlStatement(SQLStatement sqlStatement) {
+        this.sqlStatement = sqlStatement;
+    }
 }

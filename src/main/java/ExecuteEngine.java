@@ -23,14 +23,16 @@
  *
  */
 
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
+import com.alibaba.druid.sql.parser.SQLStatementParser;
 import data.DataBase;
 import data.DataEngine;
-import data.Field;
 import data.Table;
 import data.protocol.Analysis;
+import data.protocol.Insert;
 import data.protocol.Select;
 
-import java.util.*;
 
 /**
  * @author flysLi
@@ -43,31 +45,27 @@ public class ExecuteEngine {
     DataEngine engine = DataEngine.getInstance();
 
     public Object execute(String sql) {
-        Analysis analysis = new Analysis(sql);
-        List<Map<String, Object>> mapList = null;
-        Select select = (Select) analysis.doer();
         DataBase dataBase = engine.getDatabase("daas");
-        String tableName = select.getTable();
-        if (tableName == null) {
+        Analysis analysis = new Analysis(sql);
+        analysis.doer();
+        String doType = analysis.getDoType();
+        if ("INSERT".equals(doType)) {
+            Insert insert = (Insert) analysis.doer();
+            String tableName = insert.getTable();
             Table table = dataBase.getTable(tableName);
-            Map<String, Field> tableFields = table.getFields();
-            mapList = new ArrayList<>(1);
-            List values = (ArrayList) tableFields.values();
-            //获取所有字段名
-            Set<String> cloumns = tableFields.keySet();
-            for (int i = 0; i < values.size(); i++) {
-                Map<String, Object> row = new HashMap<>(1);
-                for (String cloumn : cloumns) {
-                    List val = tableFields.get(cloumn).getValue();
-                    row.put(cloumn, val);
-                }
-                mapList.add(row);
+            if (table == null) {
+                table = dataBase.create(tableName);
             }
+            return table.insert(insert.getKv());
+        } else if ("SELECT".equals(doType)) {
+            //todo 查询所有数据，测试
+            Select select = (Select) analysis.doer();
+            String tableName = select.getTable();
+            Table table = dataBase.getTable(tableName);
+            return table.select(select);
         } else {
-            return tableName + " 表信息不存在!";
+            return "[Error]:SQL Grammatical abnormality!";
         }
-
-        return mapList;
     }
 
 

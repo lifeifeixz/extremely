@@ -39,7 +39,7 @@ public class DataEngine {
     private static DataEngine dataEngine = null;
 
     private DataEngine() {
-
+        createDatabase("daas");
     }
 
     public static DataEngine getInstance() {
@@ -66,8 +66,8 @@ public class DataEngine {
         DataEngine engine = getInstance();
         DataBase dataBase = engine.createDatabase("daas");
         Table table = dataBase.create("product");
-        table.addField("id", FieldType.STRING.name());
-        table.addField("name", FieldType.STRING.name());
+        table.addColumn("id", FieldType.STRING.name());
+        table.addColumn("name", FieldType.STRING.name());
 
         /*查询已经创建的数据*/
         System.out.println("----find----");
@@ -75,7 +75,6 @@ public class DataEngine {
         Map<String, Object> map = new HashMap<String, Object>(1);
         map.put("id", "091412321");
         map.put("name", "澳龙1");
-        product.insert(map);
         System.out.println(product.toString());
     }
 

@@ -1,5 +1,8 @@
+import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLObject;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 import com.alibaba.druid.sql.parser.SQLStatementParser;
@@ -46,6 +49,7 @@ public class Test {
         while (iterator.hasNext()) {
             TableStat.Column column = iterator.next();
             System.out.println(column.getName() + "\t" + column.isWhere());
+            System.out.println("是否是查询:" + column.isSelect() + "\t" + column.getTable());
         }
 
         System.out.println("-----条件--------");
@@ -77,5 +81,26 @@ public class Test {
         long e = System.currentTimeMillis();
         System.out.println("共耗时: " + (e - t));
 
+    }
+}
+
+class TestInsert {
+    public static void main(String[] args) {
+        String sql = "insert user(id,name,age)values(1,'ffl',26)";
+        long t = System.currentTimeMillis();
+        SQLStatementParser parser = new MySqlStatementParser(sql);
+        SQLStatement statement = parser.parseStatement();
+        MySqlInsertStatement insertStatement = (MySqlInsertStatement) statement;
+//        MySqlSchemaStatVisitor visitor = new MySqlSchemaStatVisitor();
+        System.out.println("表名:\t" + insertStatement.getTableName());
+        List<SQLExpr> exprs = insertStatement.getColumns();
+        for (SQLExpr e : exprs) {
+            System.out.println(e + "\t" + e.computeDataType());
+        }
+        SQLInsertStatement.ValuesClause valuesClause = insertStatement.getValues();
+        List<SQLExpr> vals = valuesClause.getValues();
+        for (SQLExpr e : vals) {
+            System.out.println(e);
+        }
     }
 }

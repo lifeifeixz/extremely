@@ -39,8 +39,8 @@ public class Test {
         DataEngine engine = DataEngine.getInstance();
         DataBase dataBase = engine.createDatabase("daas");
         Table table = dataBase.create("product");
-        table.addField("id", FieldType.STRING.name());
-        table.addField("name", FieldType.STRING.name());
+        table.addColumn("id", FieldType.STRING.name());
+        table.addColumn("name", FieldType.STRING.name());
 
         /*查询已经创建的数据*/
         System.out.println("----find----");
@@ -48,17 +48,5 @@ public class Test {
         Map<String, Object> map = new HashMap<String, Object>(1);
         map.put("id", "091412321");
         map.put("name", "澳龙1");
-        product.insert(map);
-
-        Map<String, Object> map2 = new HashMap<String, Object>(1);
-        map2.put("id", "0914123212");
-        map2.put("name", "澳龙2");
-        product.insert(map2);
-
-        Map<String, Object> map3 = new HashMap<String, Object>(1);
-        map3.put("id", "0914123213");
-        map3.put("name", "澳龙3");
-        product.insert(map3);
-        System.out.println(product.toString());
     }
 }

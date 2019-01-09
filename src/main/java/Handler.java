@@ -54,10 +54,6 @@ public class Handler implements Runnable {
             inputStream.read(data);
             String str = new String(data);
             System.out.println("客户端消息:" + str);
-//            List<Map<String, Object>> result = new ArrayList<>();
-//            Map<String, Object> objectMap = new HashMap<>(1);
-//            objectMap.put("name", "new");
-//            result.add(objectMap);
             Object result = executeEngine.execute(str);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectOutputStream.writeObject(result);

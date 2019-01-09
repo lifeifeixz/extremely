@@ -24,9 +24,12 @@
  */
 package data.protocol;
 
+import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author flysLi
@@ -37,28 +40,28 @@ import java.util.Map;
  */
 public class Insert {
     private String table;
-    private Map<String, Object> cloumn;
+    private List<Kv> kv;
 
-    public Insert(String sql) {
-        String[] c = sql.split(" ");
-        List<String> nc = new ArrayList();
-        for (String s : c) {
-            if (s.indexOf(",") > -1) {
-                String[] ns = s.split(",");
-                for (int j = 0; j < ns.length; j++) {
-                    nc.add(ns[j]);
-                }
-            } else {
-                nc.add(s);
-            }
+    public Insert(MySqlInsertStatement statement) {
+        table = statement.getTableName().getSimpleName();
+        kv = new ArrayList<>(10);
+        List<SQLExpr> exprs = statement.getColumns();
+        SQLInsertStatement.ValuesClause clause = statement.getValues();
+        List<SQLExpr> values = clause.getValues();
+        for (int i = 0; i < exprs.size(); i++) {
+            SQLExpr e = exprs.get(i);
+            SQLExpr v = values.get(i);
+            System.out.println(v.toString());
+            kv.add(new Kv(e.toString(), v.toString()));
         }
+    }
+
+    public List<Kv> getKv() {
+        return kv;
     }
 
     public String getTable() {
         return table;
     }
-
-    public void setTable(String table) {
-        this.table = table;
-    }
 }
+

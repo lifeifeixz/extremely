@@ -24,7 +24,11 @@
  */
 package data.protocol;
 
-import java.util.Map;
+import com.alibaba.druid.sql.dialect.mysql.ast.clause.MySqlSelectIntoStatement;
+import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
+import com.alibaba.druid.stat.TableStat;
+
+import java.util.*;
 
 /**
  * @author flysLi
@@ -35,41 +39,68 @@ import java.util.Map;
  */
 public class Select {
     private String table;
-    private Map<String, String> viewCloumn;
-    private Map<String, Object> condit;
+    private Map<String, String> viewColumn;
+    private List<Condition> conditions;
+    private Set<String> groupColumn;
+    private Set<String> orderColumn;
 
-    public Select(String sql) {
-        //获取表明
-        int formIndex = sql.indexOf(" FROM ");
-        int whereIndex = sql.indexOf(" WHERE ");
-        int groupIndex = sql.indexOf(" GROUP BY ");
-        int orderIndex = sql.indexOf(" ORDER BY ");
-        if (whereIndex == -1 && groupIndex == -1 && orderIndex == -1) {
-            table = sql.substring(formIndex);
+    public Select(MySqlSchemaStatVisitor visitor) {
+        Map<TableStat.Name, TableStat> statMap = visitor.getTables();
+        conditions = convent(visitor.getConditions());
+        groupColumn = convent(visitor.getGroupByColumns());
+        orderColumn = convent(visitor.getGroupByColumns());
+        for (TableStat.Name name : statMap.keySet()) {
+            this.table = name.getName();
         }
+    }
+
+    protected Set<String> convent(Set<TableStat.Column> columns) {
+        Set<String> keys = null;
+        if (columns != null && columns.size() > 0) {
+            keys = new HashSet<>();
+            for (TableStat.Column column : columns) {
+                keys.add(column.getName());
+            }
+        }
+        return keys;
+    }
+
+    protected List<Condition> convent(List<TableStat.Condition> conditions) {
+        List<Condition> conditions1 = null;
+        if (conditions != null && conditions.size() > 0) {
+            conditions1 = new ArrayList<>();
+            for (TableStat.Condition condition : conditions) {
+                Condition c = new Condition();
+                c.setColumnName(condition.getColumn().getName());
+                c.setOperator(condition.getOperator());
+                c.setValues(condition.getValues());
+                c.setDataType(condition.getColumn().getDataType());
+                conditions1.add(c);
+            }
+        }
+        return conditions1;
     }
 
     public String getTable() {
         return table;
     }
 
-    public void setTable(String table) {
-        this.table = table;
+    public Map<String, String> getViewColumn() {
+        return viewColumn;
     }
 
-    public Map<String, String> getViewCloumn() {
-        return viewCloumn;
+    public List<Condition> getConditions() {
+        return conditions;
     }
 
-    public void setViewCloumn(Map<String, String> viewCloumn) {
-        this.viewCloumn = viewCloumn;
+    public Set<String> getGroupColumn() {
+        return groupColumn;
     }
 
-    public Map<String, Object> getCondit() {
-        return condit;
+    public Set<String> getOrderColumn() {
+        return orderColumn;
     }
 
-    public void setCondit(Map<String, Object> condit) {
-        this.condit = condit;
+    public static void main(String[] args) {
     }
 }
