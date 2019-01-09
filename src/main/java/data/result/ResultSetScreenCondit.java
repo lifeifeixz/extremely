@@ -39,6 +39,7 @@ import java.util.Map;
  * @Date 2019/1/9 14:20
  * @Version 1.0
  */
+@SuppressWarnings("all")
 public class ResultSetScreenCondit
         extends AbstractResultSetScreen
         implements ResultSetScreen {
@@ -58,43 +59,36 @@ public class ResultSetScreenCondit
         //如果条件存在，将遍历条件
         if (select.getConditions() != null) {
             newResultSet = new ArrayList<>();
-//            for (Condition c : conditions) {
-//                String cName = c.getColumnName();
-//                Object cVal = c.getValues().get(0);
-//                String cOperator = c.getOperator();
-//                boolean falg = true;
-//                Map<String, Object> row = null;
-//                for (int i = 0; i < len; i++) {
-//                    row = resultSet.get(i);
-//                    boolean flag = conditSetUp(cVal, cOperator, row.get(cName));
-//                    if (!flag) {
-//                        falg = false;
-//                    }
-//                }
-//                if (falg) {
-//                    indexResult.add(i);
-//                }
-//            }
             Map<String, Object> row = null;
             for (int i = 0; i < len; i++) {
                 row = resultSet.get(i);
-                boolean flag = true;
-                for (Condition c : conditions) {
-                    String cName = c.getColumnName();
-                    Object cVal = c.getValues().get(0);
-                    String cOperator = c.getOperator();
-                    flag = conditSetUp(cVal, cOperator, row.get(cName));
-                    if (!flag) {
-                        flag = false;
-                    }
-                }
+                boolean flag = conditsSetUp(conditions, row);
                 if (flag) {
                     newResultSet.add(row);
                 }
             }
             return group.screen(newResultSet);
+        } else {
+            return group.screen(resultSet);
         }
-        return group.screen(resultSet);
+    }
+
+    public boolean conditsSetUp(List<Condition> conditions, Map<String, Object> row) {
+        int flag = 0;
+        for (Condition c : conditions) {
+            String cName = c.getColumnName();
+            Object cVal = c.getValues().get(0);
+            String cOperator = c.getOperator();
+            boolean var1 = conditSetUp(cVal, cOperator, row.get(cName));
+            if (!var1) {
+                flag = flag - 1;
+
+            }
+        }
+        if (flag == 0) {
+            System.out.println("ture");
+        }
+        return flag == 0 ? true : false;
     }
 
     /**
